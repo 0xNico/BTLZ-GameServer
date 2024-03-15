@@ -127,5 +127,5 @@ dist
 .pnp.*
 
 # RUST Generated files
-/target/
-Cargo.lock
+/btlz_rust/target/
+/btlz_rust/Cargo.lock
