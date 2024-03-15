@@ -1,0 +1,7 @@
+{
+    "watch": ["*.js", "routes/", "models/"],
+    "ignore": ["node_modules/"],
+    "exec": "node gameServer.js",
+    "ext": "js,json"
+  }
+  

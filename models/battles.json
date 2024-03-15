@@ -1,0 +1,54 @@
+{
+    "battles": [
+        {
+            "name": "DoomKnight",
+            "tier": 4,
+            "hp_range": [1500, 5000],
+            "xp_range": [50, 200],
+            "move_set": [
+                {"name": "Flame Slash", "damage_range": [10, 25], "cooldown": 3},
+                {"name": "Kinetic Slice", "damage_range": [15, 33], "cooldown": 9}
+            ]
+        },
+        {
+            "name": "Minion of Z",
+            "tier": 5,
+            "hp_range": [800, 2000],
+            "xp_range": [20, 60],
+            "move_set": [
+                {"name": "Fury", "damage_range": [5, 12], "cooldown": 2},
+                {"name": "Relentless", "damage_range": [10, 20], "cooldown": 10}
+            ]
+        },
+        {
+            "name": "Dark Paladin",
+            "tier": 3,
+            "hp_range": [3000, 7000],
+            "xp_range": [125, 400],
+            "move_set": [
+                {"name": "Unholy Light", "damage_range": [45, 75], "cooldown": 4},
+                {"name": "Paladins Wrath", "damage_range": [100, 200], "cooldown": 12}
+            ]
+        },
+        {
+            "name": "Kinetic Knight Zeta",
+            "tier": 1,
+            "hp_range": [10000, 25000],
+            "xp_range": [400, 1200],
+            "move_set": [
+                {"name": "Kinetic Flurry", "damage_range": [45, 75], "cooldown": 2},
+                {"name": "Kinetic Collapse", "damage_range": [200, 400], "cooldown": 15}
+            ]
+        },
+        {
+            "name": "Z's Embermancer",
+            "tier": 2,
+            "hp_range": [5000, 12500],
+            "xp_range": [275, 650],
+            "move_set": [
+                {"name": "Energetic Flames", "damage_range": [33, 66], "cooldown": 2},
+                {"name": "Ignizion", "damage_range": [150, 300], "cooldown": 15}
+            ]
+        }
+    ]
+}
