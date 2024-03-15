@@ -1,0 +1,44 @@
+{
+    "weapons": [
+        {
+            "name": "Frostbane",
+            "rarity": "Mythic",
+            "description": "A Mythical Frost-Breathing Greatsword infused with The Eternal Cold.",
+            "weapon_url": "https://zkverse.gg/zkv/assets/weapon/frostbane.webp",
+            "dmg_boost": 1.1,
+            "dmg_range": [100, 200]
+        },
+        {
+            "name": "Mazamune",
+            "rarity": "Mythic",
+            "description": "The Ancient Myth - Said to have cut through energy itself.",
+            "weapon_url": "https://zkverse.gg/zkv/assets/weapon/mazamune.webp",
+            "dmg_boost": 1.25,
+            "dmg_range": [90, 210]
+        },
+        {
+            "name": "Gungir",
+            "rarity": "Mythic",
+            "description": "Ozins Mythical Godspear - Forged in the dying star 'zero'.",
+            "weapon_url": "https://zkverse.gg/zkv/assets/weapon/gungir.webp",
+            "dmg_boost": 1.2,
+            "dmg_range": [110, 150]
+        },
+        {
+            "name": "Labrys",
+            "rarity": "Mythic",
+            "description": "The Mythical symbol of Power, Authority and Divinity.",
+            "weapon_url": "https://zkverse.gg/zkv/assets/weapon/labrys.webp",
+            "dmg_boost": 1.15,
+            "dmg_range": [150, 175]
+        },
+        {
+            "name": "Dyrnwyn",
+            "rarity": "Mythic",
+            "description": "A Celtic Mythical Flamesword - Ignites in the hands of a worthy owner.",
+            "weapon_url": "https://zkverse.gg/zkv/assets/weapon/dyrnwyn.webp",
+            "dmg_boost": 1.3,
+            "dmg_range": [75, 225]
+        }
+    ]
+}

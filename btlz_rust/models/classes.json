@@ -1,0 +1,59 @@
+{
+    "classes": [
+        {
+            "name": "Beserker",
+            "armor_url": "https://zkverse.gg/zkv/assets/armor/beserker.webp",
+            "hp_boost": 1,
+            "dodge_chance": 0.08,
+            "description": "Beserkers are fast striking fearless warriors who care not for healing. DPS gud.",
+            "move_set": [
+                {"name": "Enraged Flurry", "damage_range": [35, 55], "cooldown": 1.5},
+                {"name": "Unleash Rage", "damage_range": [80, 120], "cooldown": 6}
+            ]
+        },
+        {
+            "name": "Paladin",
+            "armor_url": "https://zkverse.gg/zkv/assets/armor/paladin.webp",
+            "hp_boost": 2,
+            "dodge_chance": 0.06,
+            "description": "Paladins are the ultimate Hybrid warrior, built to sustain long tedious battles.",
+            "move_set": [
+                {"name": "Glorious Strike", "damage_range": [65, 85], "cooldown": 5},
+                {"name": "Blessing of Light", "heal_range": [100, 300], "cooldown": 30}
+            ]
+        },
+        {
+            "name": "Rogue",
+            "armor_url": "https://zkverse.gg/zkv/assets/armor/rogue.webp",
+            "hp_boost": 0.75,
+            "dodge_chance": 0.275,
+            "description": "Rogues are fast-paced, deadly precise and effective - only they lack the gear to take serious damage.",
+            "move_set": [
+                {"name": "Swift Laceration", "damage_range": [45, 75], "cooldown": 1},
+                {"name": "Lethal Incision", "damage_range": [100, 150], "cooldown": 4}
+            ]
+        },
+        {
+            "name": "Fiend",
+            "armor_url": "https://zkverse.gg/zkv/assets/armor/fiend.webp",
+            "hp_boost": 1.5,
+            "dodge_chance": 0.125,
+            "description": "Fiends drain their enemies life force to win tough battles.",
+            "move_set": [
+                {"name": "Abyssal Rampage", "damage_range": [60, 80], "cooldown": 3},
+                {"name": "Siphon", "heal_range": [80, 180], "cooldown": 15}
+            ]
+        },
+        {
+            "name": "Dark Caster '24",
+            "armor_url": "https://zkverse.gg/zkv/assets/armor/darkcaster24.webp",
+            "hp_boost": 1,
+            "dodge_chance": 0.1,
+            "description": "DPS, Dark Powered Spells unleash chaos during battles. Exlusive to players who purchased the $DARK limited package in 2024.",
+            "move_set": [
+                {"name": "Dark Vortex", "damage_range": [90, 125], "cooldown": 2},
+                {"name": "Unleash Chaos", "damage_range": [200, 350], "cooldown": 8}
+            ]
+        }
+    ]
+}
