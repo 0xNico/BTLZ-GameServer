@@ -1,2 +1,2 @@
 pub mod models;
-pub mod view_models;
+pub mod read_models;

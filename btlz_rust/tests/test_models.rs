@@ -1,16 +1,17 @@
-// tests/view_models_test.rs
-use btlz_rust::view_models;
+// Assuming you have a module `load_models` where `load_models` function is defined
+use btlz_rust::read_models::load_models;
 use std::error::Error;
 
 #[test]
 fn test_view_models() -> Result<(), Box<dyn Error>> {
-    let (classes, weapons, battles) = view_models::view_models()?;
-
-    // Assert there are exactly 5 of each
+    let (classes, weapons, battles) = load_models()?;
+    
     assert_eq!(classes.len(), 5, "There should be exactly 5 classes");
     assert_eq!(weapons.len(), 5, "There should be exactly 5 weapons");
     assert_eq!(battles.len(), 5, "There should be exactly 5 battles");
 
+    // Proceed to pretty print each class, weapon, and battle as before
+    // Consider abstracting the pretty printing into a separate function for reuse
     // Pretty print each class, weapon, and battle
     println!("Classes:");
     for class in classes {
@@ -40,6 +41,27 @@ fn test_view_models() -> Result<(), Box<dyn Error>> {
         }
         println!(); // Extra blank line for spacing
     }
+
+    Ok(())
+}
+
+#[test]
+fn test_count_models() -> Result<(), Box<dyn Error>> {
+    let (classes, weapons, battles) = load_models()?;
+
+    // Dynamic expected count based on the loaded data
+    let expected_classes_count = classes.len();
+    let expected_weapons_count = weapons.len();
+    let expected_battles_count = battles.len();
+
+    assert_eq!(classes.len(), expected_classes_count, "Mismatch in classes count");
+    assert_eq!(weapons.len(), expected_weapons_count, "Mismatch in weapons count");
+    assert_eq!(battles.len(), expected_battles_count, "Mismatch in battles count");
+
+    // Print emoji-based results
+    println!("✅ Loaded {} Classes.", classes.len());
+    println!("✅ Loaded {} Weapons.", weapons.len());
+    println!("✅ Loaded {} Battles.", battles.len());
 
     Ok(())
 }

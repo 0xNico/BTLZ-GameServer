@@ -26,13 +26,21 @@ pub struct Class {
     pub move_set: Vec<Move>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Battle {
     pub name: String,
     pub tier: i32,
     pub hp_range: Vec<i32>,
     pub xp_range: Vec<i32>,
     pub move_set: Vec<Move>,
+}
+
+#[derive(Debug, Clone)]
+pub struct BattleInstance {
+    pub id: String,
+    pub monster: Battle,
+    pub xp_to_give: i32,
+    pub battle_hp: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -45,7 +53,7 @@ pub struct Weapon {
     pub dmg_range: Vec<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Move {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
