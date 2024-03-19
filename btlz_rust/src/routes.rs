@@ -9,7 +9,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/view_models", web::get().to(view_models))
        .route("/count_models", web::get().to(count_models))
        .route("/models_json", web::get().to(models_json))
-       .route("/create_battle", web::get().to(create_battle));
+       .route("/create_battle", web::get().to(create_battle))
+       .route("/join_battle", web::get().to(join_battle));
 }
 
 async fn view_models() -> HttpResponse {
@@ -93,4 +94,21 @@ async fn create_battle(active_battles: web::Data<ActiveBattles>) -> impl Respond
     battles.insert(battle_instance.id.clone(), battle_instance.clone());
 
     HttpResponse::Ok().json(&battle_instance)
+}
+
+async fn join_battle(active_battles: web::Data<ActiveBattles>) -> HttpResponse {
+    let mut battles = active_battles.battles.lock().unwrap();
+
+    if let Some((id, battle)) = battles.iter_mut().find(|(_, b)| !b.player_joined) {
+        battle.player_joined = true; // Mark the battle as joined.
+        return HttpResponse::Ok().json(json!({
+            "message": "Successfully joined the battle.",
+            "battle_id": id,
+            "monster": battle.monster,
+            "xp_to_give": battle.xp_to_give,
+            "battle_hp": battle.battle_hp,
+        }));
+    } else {
+        return HttpResponse::NotFound().json(json!({"message": "No available battles to join."}));
+    }
 }
