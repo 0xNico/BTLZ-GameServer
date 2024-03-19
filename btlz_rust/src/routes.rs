@@ -1,6 +1,6 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, Responder};
 use crate::read_models::load_models;
-use crate::models::{Class, Weapon, Battle};
+use crate::models::{Class, Weapon, Battle, ActiveBattles};
 use crate::monster_utils::select_monster_for_battle;
 use serde::Serialize;
 use serde_json::json;
@@ -86,16 +86,11 @@ async fn models_json() -> HttpResponse {
     }
 }
 
-async fn create_battle() -> HttpResponse {
+async fn create_battle(active_battles: web::Data<ActiveBattles>) -> impl Responder {
     let battle_instance = select_monster_for_battle();
+    
+    let mut battles = active_battles.battles.lock().unwrap(); // Use `.lock().unwrap()` to access the HashMap.
+    battles.insert(battle_instance.id.clone(), battle_instance.clone());
 
-    HttpResponse::Ok().json(json!({
-        "message": "Battle instance created",
-        "battle_instance": {
-            "id": battle_instance.id,
-            "monster_name": battle_instance.monster.name,
-            "xp_to_give": battle_instance.xp_to_give,
-            "battle_hp": battle_instance.battle_hp,
-        }
-    }))
+    HttpResponse::Ok().json(&battle_instance)
 }

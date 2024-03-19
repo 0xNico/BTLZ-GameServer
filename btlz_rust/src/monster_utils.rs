@@ -28,5 +28,6 @@ pub fn select_monster_for_battle() -> BattleInstance {
         monster: selected_battle,
         xp_to_give,
         battle_hp,
+        player_joined: false,
     }
 }

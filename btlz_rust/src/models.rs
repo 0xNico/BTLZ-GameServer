@@ -1,5 +1,8 @@
 // src/models.rs - * classes, weapons and battles populate structs from API.
 use serde::{Serialize, Deserialize};
+use std::collections::HashMap;
+use std::sync::Mutex;
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Classes {
@@ -35,12 +38,18 @@ pub struct Battle {
     pub move_set: Vec<Move>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BattleInstance {
     pub id: String,
     pub monster: Battle,
     pub xp_to_give: i32,
     pub battle_hp: i32,
+    pub player_joined: bool,
+}
+
+#[derive(Debug)]
+pub struct ActiveBattles {
+    pub battles: Mutex<HashMap<String, BattleInstance>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
