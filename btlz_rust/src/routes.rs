@@ -1,9 +1,11 @@
+// src/routes.rs
 use actix_web::{web, HttpResponse, Responder};
 use crate::read_models::load_models;
 use crate::models::{Class, Weapon, Battle, ActiveBattles};
 use crate::monster_utils::select_monster_for_battle;
 use serde::Serialize;
 use serde_json::json;
+use log::{info, warn};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/view_models", web::get().to(view_models))
@@ -90,8 +92,10 @@ async fn models_json() -> HttpResponse {
 async fn create_battle(active_battles: web::Data<ActiveBattles>) -> impl Responder {
     let battle_instance = select_monster_for_battle();
     
-    let mut battles = active_battles.battles.lock().unwrap(); // Use `.lock().unwrap()` to access the HashMap.
+    let mut battles = active_battles.battles.lock().unwrap();
     battles.insert(battle_instance.id.clone(), battle_instance.clone());
+
+    info!("⚔️ - Battle created at id: {}", battle_instance.id);
 
     HttpResponse::Ok().json(&battle_instance)
 }
@@ -100,15 +104,17 @@ async fn join_battle(active_battles: web::Data<ActiveBattles>) -> HttpResponse {
     let mut battles = active_battles.battles.lock().unwrap();
 
     if let Some((id, battle)) = battles.iter_mut().find(|(_, b)| !b.player_joined) {
-        battle.player_joined = true; // Mark the battle as joined.
-        return HttpResponse::Ok().json(json!({
+        battle.player_joined = true;
+        info!("🤺 - Player joined battle at id: {}", id);
+        HttpResponse::Ok().json(json!({
             "message": "Successfully joined the battle.",
             "battle_id": id,
             "monster": battle.monster,
             "xp_to_give": battle.xp_to_give,
             "battle_hp": battle.battle_hp,
-        }));
+        }))
     } else {
-        return HttpResponse::NotFound().json(json!({"message": "No available battles to join."}));
+        warn!("No available battles to join.");
+        HttpResponse::NotFound().json(json!({"message": "No available battles to join."}))
     }
 }
