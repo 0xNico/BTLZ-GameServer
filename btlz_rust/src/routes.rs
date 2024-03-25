@@ -5,7 +5,7 @@ use crate::AppState;
 use crate::read_models::load_models;
 use crate::models::{Class, Weapon, Battle, ActiveBattles};
 use crate::monster_utils::select_monster_for_battle;
-use crate::zai_functions::{self, create_player};
+use crate::zai_functions::*;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use std::str::FromStr;
@@ -17,7 +17,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/models_json", web::get().to(models_json))
        .route("/create_battle", web::get().to(create_battle))
        .route("/join_battle", web::get().to(join_battle))
-       .route("/create_player", web::post().to(create_player_handler));
+       .route("/test_rpc", web::get().to(test_rpc_connection));
 }
 
 async fn view_models() -> HttpResponse {
@@ -132,34 +132,3 @@ struct CreatePlayerRequest {
     active_weapon: u64,
 }
 
-async fn create_player_handler(
-    app_state: web::Data<AppState>, 
-    request: web::Json<CreatePlayerRequest>
-) -> HttpResponse {
-    let signer_pubkey = match Pubkey::from_str(&request.signer_pubkey) {
-        Ok(pk) => pk,
-        Err(_) => {
-            return HttpResponse::BadRequest().json(json!({
-                "error": "Invalid signer public key"
-            }));
-        }
-    };
-
-    match zai_functions::create_player(
-        app_state.into_inner().clone(), 
-        signer_pubkey, 
-        request.active_class, 
-        request.active_weapon
-    ).await {
-        Ok(_transaction) => {
-            HttpResponse::Ok().json(json!({
-                "message": "Player creation process initiated"
-            }))
-        },
-        Err(e) => {
-            HttpResponse::InternalServerError().json(json!({
-                "error": format!("Failed to initiate player creation: {}", e)
-            }))
-        }
-    }
-}

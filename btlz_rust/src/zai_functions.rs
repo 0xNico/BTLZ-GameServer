@@ -1,58 +1,40 @@
+use actix_web::{web, HttpResponse};
+use serde::Serialize;
 use crate::AppState;
-use solana_sdk::{
-    pubkey::Pubkey,
-    instruction::{Instruction, AccountMeta},
-    system_program,
-    transaction::Transaction,
-    sysvar,
-};
 use std::sync::Arc;
+use std::time::Instant;
 
-pub async fn create_player(
-    app_state: Arc<AppState>,
-    signer_pubkey: Pubkey, // The public key of the user's wallet acting as the payer
-    active_class: u64,
-    active_weapon: u64,
-) -> Result<Transaction, Box<dyn std::error::Error>> {
-    let rpc_client = &app_state.solana_client;
-    let program_id = app_state.program_id;
+// Updated response structure to include response time
+#[derive(Serialize)]
+struct RpcConnectionResponse {
+    connected: bool,
+    message: String,
+    response_time_ms: u128, // Response time in milliseconds
+}
 
-    // Assuming that your Anchor program expects a specific instruction format
-    // Here, we construct the instruction data as a simple byte vector
-    // The first byte could represent the instruction index if needed, followed by the actual data
-    // This part is highly dependent on how your Anchor program expects to receive the instruction data
-    let mut data = Vec::new();
-    data.push(0); // For example, 0 could represent the `create_player` instruction index
-    data.extend_from_slice(&active_class.to_le_bytes());
-    data.extend_from_slice(&active_weapon.to_le_bytes());
+// Function to test RPC connection and report back with response time
+pub async fn test_rpc_connection(app_state: web::Data<AppState>) -> HttpResponse {
+    let rpc_client = app_state.solana_client.clone();
 
-    // Derive PDA for the player account
-    let seeds = &[b"player", signer_pubkey.as_ref()];
-    let (player_pda, bump_nonce) = Pubkey::find_program_address(seeds, &program_id);
+    // Start measuring time
+    let start = Instant::now();
 
-    // Include the bump nonce in the data if required by your program
-    data.push(bump_nonce);
+    // Use web::block to offload the blocking operation
+    let result = web::block(move || rpc_client.get_version()).await;
 
-    // Define the accounts involved in the transaction
-    let accounts = vec![
-        AccountMeta::new(player_pda, false), // The player PDA
-        AccountMeta::new_readonly(signer_pubkey, true), // Marking the signer
-        AccountMeta::new_readonly(sysvar::rent::id(), false), // Rent sysvar for account creation
-        AccountMeta::new_readonly(system_program::ID, false), // System program for account creation
-    ];
+    // Stop measuring time
+    let duration = start.elapsed();
 
-    let instruction = Instruction {
-        program_id,
-        accounts,
-        data,
-    };
-
-    // Create the transaction
-    let recent_blockhash = rpc_client.get_latest_blockhash()?;
-    let transaction = Transaction::new_with_payer(
-        &[instruction],
-        Some(&signer_pubkey)
-    );
-
-    Ok(transaction)
+    match result {
+        Ok(version_info) => HttpResponse::Ok().json(RpcConnectionResponse {
+            connected: true,
+            message: format!("Connected to Solana DevNet. Version: {:?}", version_info),
+            response_time_ms: duration.as_millis(), // Report response time
+        }),
+        Err(e) => HttpResponse::InternalServerError().json(RpcConnectionResponse {
+            connected: false,
+            message: format!("Failed to connect to Solana DevNet. Error: {:?}", e),
+            response_time_ms: duration.as_millis(), // Report response time even in case of failure
+        }),
+    }
 }

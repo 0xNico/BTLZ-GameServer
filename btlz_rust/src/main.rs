@@ -42,7 +42,7 @@ async fn main() -> io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     let server_keypair_path = "cfg/zaigDCJxJdzSh6ETPosxWfVrzemjLnMJxxqhZCfdEqU.json";
     let server_keypair = Arc::new(read_keypair_file(server_keypair_path).expect("Failed to read server keypair"));
-    let rpc_url = "https://api.devnet.solana.com"; // Change to your Solana cluster URL
+    let rpc_url = "https://devnet.helius-rpc.com/?api-key=b512dcfe-ee18-42ea-b3c7-82dab825d317"; // Change to your Solana cluster URL
     let solana_client = Arc::new(RpcClient::new(rpc_url));
     let program_id = Pubkey::from_str("HWjAY4TNEiAQquRKmwRXMabXf1PMGp36QyQgA162XdNr").unwrap();
 
