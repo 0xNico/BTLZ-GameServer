@@ -1,7 +1,7 @@
 #[tokio::main]
 async fn main() {
     let client = reqwest::Client::new();
-    let server_url = "http://127.0.0.1:3000"; // Adjusted to use the root URL
+    let server_url = "http://127.0.0.1:3000"; // adjust to match server env.
 
     // Combined tasks for creating and joining battles simultaneously
     let start = std::time::Instant::now();

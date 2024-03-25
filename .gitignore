@@ -129,3 +129,4 @@ dist
 # RUST Generated files
 /btlz_rust/target/
 /btlz_rust/Cargo.lock
+/btlz_rust/cfg/

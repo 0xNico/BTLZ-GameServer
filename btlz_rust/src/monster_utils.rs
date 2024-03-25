@@ -1,5 +1,5 @@
 // src/monster_utils.rs
-use crate::models::{Battle, BattleInstance, Battles};
+use crate::models::{BattleInstance, Battles};
 use rand::Rng;
 use serde_json::from_str;
 use std::fs;

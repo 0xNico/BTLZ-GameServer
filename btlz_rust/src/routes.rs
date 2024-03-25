@@ -1,10 +1,14 @@
 // src/routes.rs
 use actix_web::{web, HttpResponse, Responder};
+use solana_sdk::pubkey::Pubkey;
+use crate::AppState;
 use crate::read_models::load_models;
 use crate::models::{Class, Weapon, Battle, ActiveBattles};
 use crate::monster_utils::select_monster_for_battle;
-use serde::Serialize;
+use crate::zai_functions::{self, create_player};
+use serde::{Serialize, Deserialize};
 use serde_json::json;
+use std::str::FromStr;
 use log::{info, warn};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -12,7 +16,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/count_models", web::get().to(count_models))
        .route("/models_json", web::get().to(models_json))
        .route("/create_battle", web::get().to(create_battle))
-       .route("/join_battle", web::get().to(join_battle));
+       .route("/join_battle", web::get().to(join_battle))
+       .route("/create_player", web::post().to(create_player_handler));
 }
 
 async fn view_models() -> HttpResponse {
@@ -89,10 +94,11 @@ async fn models_json() -> HttpResponse {
     }
 }
 
-async fn create_battle(active_battles: web::Data<ActiveBattles>) -> impl Responder {
+async fn create_battle(app_state: web::Data<AppState>) -> impl Responder {
     let battle_instance = select_monster_for_battle();
-    
-    let mut battles = active_battles.battles.lock().unwrap();
+
+    // Access ActiveBattles from AppState
+    let mut battles = app_state.active_battles.battles.lock().unwrap();
     battles.insert(battle_instance.id.clone(), battle_instance.clone());
 
     info!("⚔️ - Battle created at id: {}", battle_instance.id);
@@ -100,8 +106,8 @@ async fn create_battle(active_battles: web::Data<ActiveBattles>) -> impl Respond
     HttpResponse::Ok().json(&battle_instance)
 }
 
-async fn join_battle(active_battles: web::Data<ActiveBattles>) -> HttpResponse {
-    let mut battles = active_battles.battles.lock().unwrap();
+async fn join_battle(app_state: web::Data<AppState>) -> HttpResponse {
+    let mut battles = app_state.active_battles.battles.lock().unwrap();
 
     if let Some((id, battle)) = battles.iter_mut().find(|(_, b)| !b.player_joined) {
         battle.player_joined = true;
@@ -116,5 +122,44 @@ async fn join_battle(active_battles: web::Data<ActiveBattles>) -> HttpResponse {
     } else {
         warn!("No available battles to join.");
         HttpResponse::NotFound().json(json!({"message": "No available battles to join."}))
+    }
+}
+
+#[derive(Deserialize)]
+struct CreatePlayerRequest {
+    signer_pubkey: String,
+    active_class: u64,
+    active_weapon: u64,
+}
+
+async fn create_player_handler(
+    app_state: web::Data<AppState>, 
+    request: web::Json<CreatePlayerRequest>
+) -> HttpResponse {
+    let signer_pubkey = match Pubkey::from_str(&request.signer_pubkey) {
+        Ok(pk) => pk,
+        Err(_) => {
+            return HttpResponse::BadRequest().json(json!({
+                "error": "Invalid signer public key"
+            }));
+        }
+    };
+
+    match zai_functions::create_player(
+        app_state.into_inner().clone(), 
+        signer_pubkey, 
+        request.active_class, 
+        request.active_weapon
+    ).await {
+        Ok(_transaction) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Player creation process initiated"
+            }))
+        },
+        Err(e) => {
+            HttpResponse::InternalServerError().json(json!({
+                "error": format!("Failed to initiate player creation: {}", e)
+            }))
+        }
     }
 }
