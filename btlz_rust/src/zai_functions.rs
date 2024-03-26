@@ -72,22 +72,21 @@ pub async fn fetch_players(app_state: web::Data<AppState>) -> HttpResponse {
     match result {
         Ok(Ok(accounts)) => {
             let players: Vec<PlayerJson> = accounts.into_iter().map(|(pubkey, account)| {
-                let player = Player::try_from_slice(&account.data)
-                    .unwrap_or_else(|e| {
-                        log::error!("Failed to deserialize Player: {:?}", e);
-                        Player::default()
-                    });
+                let player = PlayerAccount
+                ::deserialize( &account.data)
+                .expect("Failed to deserialize players");
 
+                let player_data = player.0;
 
                 PlayerJson {
                     public_key: pubkey.to_string(),
                     account: PlayerData {
-                        player_id: player.player_id.to_string(),
-                        xp: player.xp.to_string(),
-                        chests: player.chests.to_string(),
-                        active_class: player.active_class.to_string(),
-                        active_weapon: player.active_weapon.to_string(),
-                        joined: player.joined.to_string(),
+                        player_id: player_data.player_id.to_string(),
+                        xp: player_data.xp.to_string(),
+                        chests: player_data.chests.to_string(),
+                        active_class: player_data.active_class.to_string(),
+                        active_weapon: player_data.active_weapon.to_string(),
+                        joined: player_data.joined.to_string(),
                     },
                 }
             }).collect();
