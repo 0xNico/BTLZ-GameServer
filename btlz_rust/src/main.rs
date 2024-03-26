@@ -20,6 +20,7 @@ use solana_sdk::pubkey::Pubkey;
 mod models;
 mod read_models;
 mod monster_utils;
+mod player_utils;
 mod routes;
 mod zai_functions;
 mod app_state;

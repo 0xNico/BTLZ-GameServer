@@ -17,7 +17,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/models_json", web::get().to(models_json))
        .route("/create_battle", web::get().to(create_battle))
        .route("/join_battle", web::get().to(join_battle))
-       .route("/test_rpc", web::get().to(test_rpc_connection));
+       .route("/test_rpc", web::get().to(test_rpc_connection))
+       .route("/fetch_players", web::get().to(fetch_players));
 }
 
 async fn view_models() -> HttpResponse {
