@@ -1,24 +1,25 @@
 [package]
-name = "btlz_rust"
+name = "zai_interface"
 version = "0.1.0"
+description = "Created with Anchor"
 edition = "2021"
 
-[workspace]
-members = [
-    "../btlz_rust/zai_interface",
-]
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "zai_interface"
 
-[[bin]]
-name = "instance_bench"
-path = "src/benchmarks/instance_bench.rs"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
 
 [dependencies]
+anchor-lang = "0.29.0"
+solana-program = "1.18.0"
 solana-client = "1.8"
 solana-sdk = "1.8"
-solana-program = "1.8"
-actix-web = "4.5.1"
-actix-service = "2.0.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = "0.8.5"
@@ -28,5 +29,6 @@ tokio = { version = "1.36.0", features = ["full", "signal"] }
 reqwest = { version = "0.12.2", features = ["json"] }
 futures = "0.3"
 log = "0.4"
-borsh = "1.3.0"
-zai_interface = { path = "../btlz_rust/zai_interface/" } 
+borsh = "1.4.0"
+num-derive = "0.4.2"
+num-traits = "0.2"

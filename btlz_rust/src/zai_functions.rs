@@ -1,4 +1,5 @@
 use borsh::BorshDeserialize;
+use zai_interface::{PlayerAccount, accounts::*};
 use actix_web::{web, HttpResponse, error::BlockingError};
 use actix_web::web::block;
 use solana_sdk::pubkey::Pubkey;
@@ -9,31 +10,7 @@ use crate::player_utils::Player;
 use std::time::Instant;
 use std::str::FromStr;
 use std::sync::Arc;
-
-// Serializable version of the Player struct for HTTP responses
-#[derive(Serialize, Deserialize)]
-struct PlayerResponse {
-    player_id: String,
-    xp: i64,
-    chests: u64,
-    active_class: u64,
-    active_weapon: u64,
-    joined: i64,
-}
-
-impl PlayerResponse {
-    // Function to create a new PlayerResponse from the on-chain Player data
-    fn from_onchain_data(player_id: &Pubkey, player_data: &Player) -> Self {
-        PlayerResponse {
-            player_id: player_id.to_string(),
-            xp: player_data.xp,
-            chests: player_data.chests,
-            active_class: player_data.active_class,
-            active_weapon: player_data.active_weapon,
-            joined: player_data.joined,
-        }
-    }
-}
+use std::borrow::Borrow;
 
 // Updated response structure to include response time
 #[derive(Serialize)]
@@ -70,30 +47,60 @@ pub async fn test_rpc_connection(app_state: web::Data<AppState>) -> HttpResponse
     }
 }
 
+#[derive(Serialize)]
+struct PlayerJson {
+    public_key: String,
+    account: PlayerData,
+}
+
+#[derive(Serialize)]
+struct PlayerData {
+    player_id: String,
+    xp: String,
+    chests: String,
+    active_class: String,
+    active_weapon: String,
+    joined: String,
+}
+
 pub async fn fetch_players(app_state: web::Data<AppState>) -> HttpResponse {
     let client = Arc::clone(&app_state.solana_client);
     let program_id = app_state.program_id;
 
-    // Using web::block to offload the synchronous operation to a threadpool
-    let accounts_result = web::block(move || {
-        client.get_program_accounts(&program_id)
-    }).await;
+    let result = web::block(move || client.get_program_accounts(&program_id)).await;
 
-    match accounts_result {
+    match result {
         Ok(Ok(accounts)) => {
-            // Process accounts
-            // Convert accounts to your desired format here
-            HttpResponse::Ok().json(accounts) // Placeholder response
+            let players: Vec<PlayerJson> = accounts.into_iter().map(|(pubkey, account)| {
+                let player = Player::try_from_slice(&account.data)
+                    .unwrap_or_else(|e| {
+                        log::error!("Failed to deserialize Player: {:?}", e);
+                        Player::default()
+                    });
+
+
+                PlayerJson {
+                    public_key: pubkey.to_string(),
+                    account: PlayerData {
+                        player_id: player.player_id.to_string(),
+                        xp: player.xp.to_string(),
+                        chests: player.chests.to_string(),
+                        active_class: player.active_class.to_string(),
+                        active_weapon: player.active_weapon.to_string(),
+                        joined: player.joined.to_string(),
+                    },
+                }
+            }).collect();
+
+            HttpResponse::Ok().json(players)
         },
         Ok(Err(e)) => {
-            // Handle RPC client error
-            eprintln!("RPC error: {:?}", e);
+            log::error!("RPC error: {:?}", e);
             HttpResponse::InternalServerError().json("RPC error occurred")
         },
         Err(e) => {
-            // Handle blocking operation error
-            eprintln!("Blocking operation error: {:?}", e);
+            log::error!("Blocking operation error: {:?}", e);
             HttpResponse::InternalServerError().json("Server error occurred")
-        }
+        },
     }
 }
