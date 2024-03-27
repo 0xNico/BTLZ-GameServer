@@ -103,3 +103,51 @@ pub async fn fetch_players(app_state: web::Data<AppState>) -> HttpResponse {
         },
     }
 }
+
+pub async fn fetch_single_player(
+    app_state: web::Data<AppState>,
+    player_id_str: web::Path<String>,
+) -> HttpResponse {
+    let client = Arc::clone(&app_state.solana_client);
+    let program_id = app_state.program_id;
+    let player_id = Pubkey::from_str(&player_id_str).expect("Invalid player ID");
+
+    // Derive the PDA used to store player data
+    let (player_pubkey, _bump_seed) = Pubkey::find_program_address(
+        &[b"player", &player_id.to_bytes()],
+        &program_id,
+    );
+
+    let result = web::block(move || client.get_account(&player_pubkey)).await;
+
+    match result {
+        Ok(Ok(account)) => {
+            let player = PlayerAccount::deserialize(&account.data)
+                .expect("Failed to deserialize player");
+
+            let player_data = player.0;
+
+            let player_json = PlayerJson {
+                public_key: player_pubkey.to_string(),
+                account: PlayerData {
+                    player_id: player_data.player_id.to_string(),
+                    xp: player_data.xp.to_string(),
+                    chests: player_data.chests.to_string(),
+                    active_class: player_data.active_class.to_string(),
+                    active_weapon: player_data.active_weapon.to_string(),
+                    joined: player_data.joined.to_string(),
+                },
+            };
+
+            HttpResponse::Ok().json(player_json)
+        },
+        Ok(Err(e)) => {
+            log::error!("RPC error: {:?}", e);
+            HttpResponse::InternalServerError().json("RPC error occurred")
+        },
+        Err(e) => {
+            log::error!("Blocking operation error: {:?}", e);
+            HttpResponse::InternalServerError().json("Server error occurred")
+        },
+    }
+}

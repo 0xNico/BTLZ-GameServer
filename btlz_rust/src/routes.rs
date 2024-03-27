@@ -8,7 +8,6 @@ use crate::monster_utils::select_monster_for_battle;
 use crate::zai_functions::*;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use std::str::FromStr;
 use log::{info, warn};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -18,7 +17,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/create_battle", web::get().to(create_battle))
        .route("/join_battle", web::get().to(join_battle))
        .route("/test_rpc", web::get().to(test_rpc_connection))
-       .route("/fetch_players", web::get().to(fetch_players));
+       .route("/fetch_players", web::get().to(fetch_players))
+       .route("/fetch_player/{player_id}", web::get().to(fetch_single_player));
 }
 
 async fn view_models() -> HttpResponse {
@@ -124,12 +124,5 @@ async fn join_battle(app_state: web::Data<AppState>) -> HttpResponse {
         warn!("No available battles to join.");
         HttpResponse::NotFound().json(json!({"message": "No available battles to join."}))
     }
-}
-
-#[derive(Deserialize)]
-struct CreatePlayerRequest {
-    signer_pubkey: String,
-    active_class: u64,
-    active_weapon: u64,
 }
 
