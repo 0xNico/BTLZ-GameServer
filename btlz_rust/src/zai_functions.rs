@@ -56,6 +56,7 @@ struct PlayerJson {
 #[derive(Serialize)]
 struct PlayerData {
     player_id: String,
+    level: String,
     xp: String,
     chests: String,
     active_class: String,
@@ -82,6 +83,7 @@ pub async fn fetch_players(app_state: web::Data<AppState>) -> HttpResponse {
                     public_key: pubkey.to_string(),
                     account: PlayerData {
                         player_id: player_data.player_id.to_string(),
+                        level: player_data.level.to_string(),
                         xp: player_data.xp.to_string(),
                         chests: player_data.chests.to_string(),
                         active_class: player_data.active_class.to_string(),
@@ -131,6 +133,7 @@ pub async fn fetch_single_player(
                 public_key: player_pubkey.to_string(),
                 account: PlayerData {
                     player_id: player_data.player_id.to_string(),
+                    level: player_data.level.to_string(),
                     xp: player_data.xp.to_string(),
                     chests: player_data.chests.to_string(),
                     active_class: player_data.active_class.to_string(),

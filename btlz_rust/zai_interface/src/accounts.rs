@@ -9,10 +9,11 @@ pub const PLAYER_ACCOUNT_DISCM: [u8; 8] = [205, 222, 112, 7, 165, 155, 206, 218]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Player {
     pub player_id: Pubkey,
+    pub level: u8,
     pub xp: i64,
-    pub chests: u64,
-    pub active_class: u64,
-    pub active_weapon: u64,
+    pub chests: u16,
+    pub active_class: u8,
+    pub active_weapon: u8,
     pub joined: i64,
 }
 #[derive(Clone, Debug, PartialEq)]

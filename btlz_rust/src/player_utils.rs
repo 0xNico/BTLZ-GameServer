@@ -6,6 +6,7 @@ use solana_sdk::pubkey::Pubkey;
 pub struct Player {
     #[serde(rename = "playerId")]
     pub player_id: Pubkey,
+    pub level: u8,
     pub xp: i64,
     pub chests: u64,
     #[serde(rename = "activeClass")]
@@ -19,6 +20,7 @@ impl Default for Player {
     fn default() -> Self {
         Player {
             player_id: Pubkey::new_from_array([0u8; 32]),
+            level: 1,
             xp: 0,
             chests: 0,
             active_class: 0,
