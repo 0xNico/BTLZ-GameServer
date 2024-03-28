@@ -1,5 +1,9 @@
-use borsh::BorshDeserialize;
-use zai_interface::{PlayerAccount, accounts::*};
+
+use solana_sdk::commitment_config::CommitmentConfig;
+use solana_sdk::instruction::{AccountMeta, Instruction};
+use solana_sdk::signer::Signer;
+use solana_sdk::transaction::Transaction;
+use zai_interface::{accounts::*, modify_player_xp_ix, ModifyPlayerXpIxArgs, ModifyPlayerXpKeys, PlayerAccount};
 use actix_web::{web, HttpResponse, error::BlockingError};
 use actix_web::web::block;
 use solana_sdk::pubkey::Pubkey;
@@ -10,6 +14,7 @@ use crate::player_utils::Player;
 use std::time::Instant;
 use std::str::FromStr;
 use std::sync::Arc;
+use borsh::{BorshDeserialize, BorshSerialize};
 use std::borrow::Borrow;
 
 // Updated response structure to include response time
@@ -151,6 +156,100 @@ pub async fn fetch_single_player(
         Err(e) => {
             log::error!("Blocking operation error: {:?}", e);
             HttpResponse::InternalServerError().json("Server error occurred")
+        },
+    }
+}
+
+#[derive(BorshSerialize, BorshDeserialize)]
+pub enum ZaiInstruction {
+    #[borsh]
+    ModifyPlayerXp {
+        xp_change: i64,
+    }
+}
+
+// Handler for increasing XP
+pub async fn increase_xp(
+    app_state: web::Data<AppState>,
+    path: web::Path<(String, i64)>,
+    req: actix_web::HttpRequest,
+) -> HttpResponse {
+    // Log headers
+    for (key, value) in req.headers() {
+        log::info!("Header: {} = {:?}", key, value);
+    }
+
+    let program_id = app_state.program_id;
+    let server_keypair = Arc::clone(&app_state.server_keypair);
+    let client = Arc::clone(&app_state.solana_client);
+
+    let (player_id_str, xp_change) = path.into_inner();
+    
+    // Execute blocking code in web::block
+    let response = web::block(move || {
+        let player_id = Pubkey::from_str(&player_id_str).map_err(|_| "Invalid player ID")?;
+
+        // Derive the PDA used to store player data
+        let (player_pubkey, _bump_seed) = Pubkey::find_program_address(
+            &[b"player", player_id.as_ref()],
+            &program_id,
+        );
+
+        let admin_pubkey = server_keypair.pubkey();
+        let modify_player_xp_keys = ModifyPlayerXpKeys {
+            player_account: player_pubkey,
+            admin: admin_pubkey,
+        };
+
+        let modify_player_xp_args = ModifyPlayerXpIxArgs {
+            xp_change,
+        };
+
+        // Create the instruction
+        let instruction = modify_player_xp_ix(modify_player_xp_keys, modify_player_xp_args)
+            .map_err(|_| "Failed to create instruction")?;
+
+        // Get the latest blockhash
+        let recent_blockhash = client.get_latest_blockhash()
+            .map_err(|_| "Failed to get latest blockhash")?;
+
+        // Create the transaction
+        let transaction = Transaction::new_signed_with_payer(
+            &[instruction],
+            Some(&admin_pubkey),
+            &[&*server_keypair],
+            recent_blockhash,
+        );
+
+        // Send the transaction
+        let send_result = client.send_transaction(&transaction);
+
+        send_result.map_err(|e| format!("Failed to send transaction: {:?}", e))
+            .and_then(|signature| {
+                // Instead of waiting for full confirmation, check if it's processed
+                client.confirm_transaction_with_commitment(&signature, CommitmentConfig::processed())
+                    .map_err(|e| format!("Failed to confirm transaction: {:?}", e))
+                    .map(|_| signature)
+            })
+    }).await;
+
+    // Process the response
+    match response {
+        Ok(Ok(signature)) => {
+            let signature_str = signature.to_string();
+            log::info!("Transaction successful: {}", signature_str);
+            HttpResponse::Ok().json(serde_json::json!({
+                "status": "success",
+                "transaction": signature_str,
+            }))
+        },
+        Ok(Err(e)) => {
+            log::error!("Transaction failed: {}", e);
+            HttpResponse::InternalServerError().body(format!("Transaction failed: {}", e))
+        },
+        Err(e) => {
+            log::error!("Server error: {:?}", e);
+            HttpResponse::InternalServerError().body("Server error")
         },
     }
 }

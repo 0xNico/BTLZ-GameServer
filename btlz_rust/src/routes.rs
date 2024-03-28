@@ -18,7 +18,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/join_battle", web::get().to(join_battle))
        .route("/test_rpc", web::get().to(test_rpc_connection))
        .route("/fetch_players", web::get().to(fetch_players))
-       .route("/fetch_player/{player_id}", web::get().to(fetch_single_player));
+       .route("/fetch_player/{player_id}", web::get().to(fetch_single_player))
+       .route("/increase_xp/{player_id_str}/{amount}", web::post().to(increase_xp));
 }
 
 async fn view_models() -> HttpResponse {

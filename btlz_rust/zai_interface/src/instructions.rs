@@ -155,8 +155,8 @@ pub const CREATE_PLAYER_IX_DISCM: [u8; 8] = [19, 178, 189, 216, 159, 134, 0, 192
 #[derive(BorshDeserialize, BorshSerialize, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePlayerIxArgs {
-    pub active_class: u64,
-    pub active_weapon: u64,
+    pub active_class: u8,
+    pub active_weapon: u8,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct CreatePlayerIxData(pub CreatePlayerIxArgs);
@@ -360,7 +360,7 @@ pub const CHANGE_DEFAULT_CLASS_IX_DISCM: [u8; 8] = [
 #[derive(BorshDeserialize, BorshSerialize, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDefaultClassIxArgs {
-    pub new_class: u64,
+    pub new_class: u8,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChangeDefaultClassIxData(pub ChangeDefaultClassIxArgs);
