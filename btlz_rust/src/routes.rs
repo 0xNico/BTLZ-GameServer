@@ -19,7 +19,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
        .route("/test_rpc", web::get().to(test_rpc_connection))
        .route("/fetch_players", web::get().to(fetch_players))
        .route("/fetch_player/{player_id}", web::get().to(fetch_single_player))
-       .route("/increase_xp/{player_id_str}/{amount}", web::post().to(increase_xp));
+       .route("/increase_xp/{player_id_str}/{amount}", web::post().to(increase_xp))
+       .route("/equip_premium_item/{player_id_str}/{item_type}/{item_id}", web::post().to(equip_premium_item));
 }
 
 async fn view_models() -> HttpResponse {

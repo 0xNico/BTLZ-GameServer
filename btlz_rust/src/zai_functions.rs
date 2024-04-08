@@ -3,7 +3,7 @@ use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::instruction::{AccountMeta, Instruction};
 use solana_sdk::signer::Signer;
 use solana_sdk::transaction::Transaction;
-use zai_interface::{accounts::*, modify_player_xp_ix, ModifyPlayerXpIxArgs, ModifyPlayerXpKeys, PlayerAccount};
+use zai_interface::{accounts::*, modify_player_xp_ix, ModifyPlayerXpIxArgs, ModifyPlayerXpKeys, PlayerAccount, equip_premium_item_ix, EquipPremiumItemIxArgs, EquipPremiumItemKeys, PremiumItemType};
 use actix_web::{web, HttpResponse, error::BlockingError};
 use actix_web::web::block;
 use solana_sdk::pubkey::Pubkey;
@@ -251,5 +251,62 @@ pub async fn increase_xp(
             log::error!("Server error: {:?}", e);
             HttpResponse::InternalServerError().body("Server error")
         },
+    }
+}
+
+pub async fn equip_premium_item(
+    app_state: web::Data<AppState>,
+    path: web::Path<(String, PremiumItemType, u8)>,
+) -> HttpResponse {
+    let (player_id_str, item_type, item_id) = path.into_inner();
+    let program_id = app_state.program_id;
+    let server_keypair = Arc::clone(&app_state.server_keypair);
+    let client = Arc::clone(&app_state.solana_client);
+
+    let response = web::block(move || {
+        let player_id = Pubkey::from_str(&player_id_str).map_err(|_| "Invalid player ID")?;
+        let (player_pubkey, _bump_seed) = Pubkey::find_program_address(
+            &[b"player", player_id.as_ref()],
+            &program_id,
+        );
+
+        let keys = EquipPremiumItemKeys {
+            player_account: player_pubkey,
+            admin: server_keypair.pubkey(),
+        };
+
+        let args = EquipPremiumItemIxArgs { item_type, item_id };
+
+        let instruction = equip_premium_item_ix(keys, args)
+            .map_err(|_| "Failed to create equip premium item instruction")?;
+
+        let recent_blockhash = client.get_latest_blockhash()
+            .map_err(|_| "Failed to get latest blockhash")?;
+
+        let transaction = Transaction::new_signed_with_payer(
+            &[instruction],
+            Some(&keys.admin),
+            &[&*server_keypair],
+            recent_blockhash,
+        );
+
+        client.send_transaction(&transaction)
+            .map_err(|e| format!("Failed to send transaction: {:?}", e))
+            .and_then(|signature| {
+                client.confirm_transaction_with_commitment(&signature, solana_sdk::commitment_config::CommitmentConfig::processed())
+                    .map_err(|e| format!("Failed to confirm transaction: {:?}", e))
+                    .map(|_| signature)
+            })
+    }).await;
+
+    match response {
+        Ok(Ok(signature)) => {
+            HttpResponse::Ok().json(serde_json::json!({
+                "status": "success",
+                "transaction": signature.to_string(),
+            }))
+        },
+        Ok(Err(e)) => HttpResponse::InternalServerError().body(format!("Transaction failed: {}", e)),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Server error: {:?}", e)),
     }
 }
