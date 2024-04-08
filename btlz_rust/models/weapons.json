@@ -1,6 +1,7 @@
 {
     "weapons": [
         {
+            "id": 250,
             "name": "Frostbane",
             "rarity": "Mythic",
             "description": "A Mythical Frost-Breathing Greatsword infused with The Eternal Cold.",
@@ -9,6 +10,7 @@
             "dmg_range": [100, 200]
         },
         {
+            "id": 251,
             "name": "Mazamune",
             "rarity": "Mythic",
             "description": "The Ancient Myth - Said to have cut through energy itself.",
@@ -17,6 +19,7 @@
             "dmg_range": [90, 210]
         },
         {
+            "id": 252,
             "name": "Gungir",
             "rarity": "Mythic",
             "description": "Ozins Mythical Godspear - Forged in the dying star 'zero'.",
@@ -25,6 +28,7 @@
             "dmg_range": [110, 150]
         },
         {
+            "id": 253,
             "name": "Labrys",
             "rarity": "Mythic",
             "description": "The Mythical symbol of Power, Authority and Divinity.",
@@ -33,6 +37,7 @@
             "dmg_range": [150, 175]
         },
         {
+            "id": 254,
             "name": "Dyrnwyn",
             "rarity": "Mythic",
             "description": "A Celtic Mythical Flamesword - Ignites in the hands of a worthy owner.",

@@ -30,8 +30,8 @@ async fn view_models() -> HttpResponse {
 
             response.push_str("Classes:\n");
             for class in classes {
-                response.push_str(&format!("Name: {}\nArmor URL: {}\nHP Boost: {}\nDodge Chance: {}\nDescription: {}\n", 
-                    class.name, class.armor_url, class.hp_boost, class.dodge_chance, class.description));
+                response.push_str(&format!("ID: {}\nName: {}\nArmor URL: {}\nHP Boost: {}\nDodge Chance: {}\nDescription: {}\n", 
+                    class.id, class.name, class.armor_url, class.hp_boost, class.dodge_chance, class.description));
                 for m in class.move_set {
                     response.push_str(&format!("  Move: {}\n  Damage Range: {:?}\n  Heal Range: {:?}\n  Cooldown: {}s\n", 
                         m.name, m.damage_range, m.heal_range, m.cooldown));
@@ -41,8 +41,8 @@ async fn view_models() -> HttpResponse {
 
             response.push_str("Weapons:\n");
             for weapon in weapons {
-                response.push_str(&format!("Name: {}\nRarity: {}\nDescription: {}\nWeapon URL: {}\nDMG Boost: {}\nDMG Range: {:?}\n", 
-                    weapon.name, weapon.rarity, weapon.description, weapon.weapon_url, weapon.dmg_boost, weapon.dmg_range));
+                response.push_str(&format!("ID: {}\nName: {}\nRarity: {}\nDescription: {}\nWeapon URL: {}\nDMG Boost: {}\nDMG Range: {:?}\n", 
+                    weapon.id, weapon.name, weapon.rarity, weapon.description, weapon.weapon_url, weapon.dmg_boost, weapon.dmg_range));
                 response.push_str("\n"); // Extra blank line for spacing
             }
 

@@ -1,6 +1,7 @@
 {
     "classes": [
         {
+            "id": 250,
             "name": "Beserker",
             "armor_url": "https://zkverse.gg/zkv/assets/armor/beserker.webp",
             "hp_boost": 1,
@@ -12,6 +13,7 @@
             ]
         },
         {
+            "id": 251,
             "name": "Paladin",
             "armor_url": "https://zkverse.gg/zkv/assets/armor/paladin.webp",
             "hp_boost": 2,
@@ -23,6 +25,7 @@
             ]
         },
         {
+            "id": 252,
             "name": "Rogue",
             "armor_url": "https://zkverse.gg/zkv/assets/armor/rogue.webp",
             "hp_boost": 0.75,
@@ -34,6 +37,7 @@
             ]
         },
         {
+            "id": 253,
             "name": "Fiend",
             "armor_url": "https://zkverse.gg/zkv/assets/armor/fiend.webp",
             "hp_boost": 1.5,
@@ -45,6 +49,7 @@
             ]
         },
         {
+            "id": 254,
             "name": "Dark Caster '24",
             "armor_url": "https://zkverse.gg/zkv/assets/armor/darkcaster24.webp",
             "hp_boost": 1,

@@ -21,6 +21,7 @@ pub struct Battles {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Class {
+    pub id: u8,
     pub name: String,
     pub armor_url: String,
     pub hp_boost: f64,
@@ -54,6 +55,7 @@ pub struct ActiveBattles {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Weapon {
+    pub id: u8,
     pub name: String,
     pub rarity: String,
     pub description: String,
