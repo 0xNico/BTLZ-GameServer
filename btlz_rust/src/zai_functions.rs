@@ -3,6 +3,7 @@ use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::instruction::{AccountMeta, Instruction};
 use solana_sdk::signer::Signer;
 use solana_sdk::transaction::Transaction;
+use solana_sdk::compute_budget::ComputeBudgetInstruction;
 use zai_interface::{accounts::*, modify_player_xp_ix, ModifyPlayerXpIxArgs, ModifyPlayerXpKeys, PlayerAccount, equip_premium_item_ix, EquipPremiumItemIxArgs, EquipPremiumItemKeys, PremiumItemType};
 use actix_web::{web, HttpResponse, error::BlockingError};
 use actix_web::web::block;
@@ -265,10 +266,7 @@ pub async fn equip_premium_item(
 
     let response = web::block(move || {
         let player_id = Pubkey::from_str(&player_id_str).map_err(|_| "Invalid player ID")?;
-        let (player_pubkey, _bump_seed) = Pubkey::find_program_address(
-            &[b"player", player_id.as_ref()],
-            &program_id,
-        );
+        let (player_pubkey, _bump_seed) = Pubkey::find_program_address(&[b"player", player_id.as_ref()], &program_id);
 
         let keys = EquipPremiumItemKeys {
             player_account: player_pubkey,
@@ -276,15 +274,17 @@ pub async fn equip_premium_item(
         };
 
         let args = EquipPremiumItemIxArgs { item_type, item_id };
+        let equip_instruction = equip_premium_item_ix(keys, args).map_err(|_| "Failed to create equip premium item instruction")?;
 
-        let instruction = equip_premium_item_ix(keys, args)
-            .map_err(|_| "Failed to create equip premium item instruction")?;
+        // Set your desired compute units limit
+        let compute_budget_instruction = ComputeBudgetInstruction::set_compute_unit_limit(25_000); // AVG 25,000 CU
 
-        let recent_blockhash = client.get_latest_blockhash()
-            .map_err(|_| "Failed to get latest blockhash")?;
+        let transaction_instructions = vec![compute_budget_instruction, equip_instruction];
+
+        let recent_blockhash = client.get_latest_blockhash().map_err(|_| "Failed to get latest blockhash")?;
 
         let transaction = Transaction::new_signed_with_payer(
-            &[instruction],
+            &transaction_instructions,
             Some(&keys.admin),
             &[&*server_keypair],
             recent_blockhash,
@@ -300,12 +300,10 @@ pub async fn equip_premium_item(
     }).await;
 
     match response {
-        Ok(Ok(signature)) => {
-            HttpResponse::Ok().json(serde_json::json!({
-                "status": "success",
-                "transaction": signature.to_string(),
-            }))
-        },
+        Ok(Ok(signature)) => HttpResponse::Ok().json(serde_json::json!({
+            "status": "success",
+            "transaction": signature.to_string(),
+        })),
         Ok(Err(e)) => HttpResponse::InternalServerError().body(format!("Transaction failed: {}", e)),
         Err(e) => HttpResponse::InternalServerError().body(format!("Server error: {:?}", e)),
     }
